@@ -17,7 +17,55 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 3D Map System */
+.perspective-stage {
+  perspective: 1200px;
+  perspective-origin: 50% 45%;
+}
+
+.map-surface {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(31, 180, 180, 0.15);
+  box-shadow:
+    0 0 30px rgba(31, 180, 180, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Animated glowing border */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--angle), transparent 60%, rgba(31,180,180,0.4) 80%, transparent 100%);
+  animation: borderRotate 4s linear infinite;
+  z-index: -1;
+}
+
+@keyframes borderRotate {
+  to { --angle: 360deg; }
+}
+
+@keyframes dashFlow {
+  to { stroke-dashoffset: -28; }
 }
 
 @layer utilities {

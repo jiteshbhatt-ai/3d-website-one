@@ -1,101 +1,70 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useRef } from "react";
+import { useImagePreloader } from "@/hooks/useImagePreloader";
+import { useContainerScrollProgress } from "@/hooks/useContainerScrollProgress";
+import { CanvasScroller } from "@/components/sections/CanvasScroller";
+import { HeroText } from "@/components/ui/HeroText";
+import { Navbar } from "@/components/ui/Navbar";
+import { Preloader } from "@/components/ui/Preloader";
+import { BookingForm } from "@/components/ui/BookingForm";
+import { Footer } from "@/components/sections/Footer";
+
+import { CursorGlow } from "@/components/ui/CursorGlow";
+
+const FRAME_COUNT = 264;
+const FRAME_PATH = "/sequence-1/";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { images, loadedCount, isComplete } = useImagePreloader(FRAME_COUNT, FRAME_PATH);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const progress = useContainerScrollProgress(scrollContainerRef);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  return (
+    <main className="relative min-h-screen bg-black">
+      {/* Loading Screen */}
+      {!isComplete && (
+        <Preloader progress={(loadedCount / FRAME_COUNT) * 100} />
+      )}
+
+      {/* Main Experience */}
+      <div
+        className={`relative z-10 transition-opacity duration-1000 ease-in-out ${isComplete ? "opacity-100" : "opacity-0"}`}
+      >
+        <CursorGlow />
+        <Navbar onBookNow={() => setIsBookingOpen(true)} />
+
+        {/* Scroll-scrubbed sequence */}
+        <div ref={scrollContainerRef} className="relative h-[400vh]">
+          <div className="sticky top-0 h-screen">
+            <CanvasScroller images={images} frameCount={FRAME_COUNT} progress={progress} />
+            <HeroText progress={progress} />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* CTA section */}
+        <div className="min-h-[60vh] bg-black/85 flex flex-col items-center justify-center text-center px-4 relative z-20">
+          <h2 className="font-serif text-4xl md:text-6xl lg:text-8xl tracking-[0.2em] text-white uppercase mb-8 drop-shadow-sm">
+            Your Journey<br />Awaits.
+          </h2>
+          <button
+            onClick={() => setIsBookingOpen(true)}
+            className="group relative overflow-hidden border border-brand-turquoise text-brand-turquoise px-8 py-5 mt-4 font-sans text-sm tracking-widest uppercase transition-all duration-300 hover:shadow-[0_0_25px_rgba(31,180,180,0.4)]"
+          >
+            <span className="relative z-10 group-hover:text-white transition-colors duration-300">Start Your Reservation</span>
+            <span className="absolute inset-0 bg-brand-turquoise scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left" />
+          </button>
+        </div>
+
+        {/* Footer */}
+        <Footer />
+      </div>
+
+      <BookingForm
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
+      />
+    </main>
   );
 }
